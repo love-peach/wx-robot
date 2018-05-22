@@ -36,7 +36,7 @@ chrome.extension.onRequest.addListener(function (request) {
 
     //监听最新的消息
     if (request.url.indexOf("cgi-bin/mmwebwx-bin/webwxsync") >= 0) {
-
+        console.log('接受消息也会触发?');
         //处理部分地域请求冲突
         if(request.url.indexOf("wx.qq.com")>=0){
             url_wx="https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsg?"+"me=me";
@@ -45,6 +45,8 @@ chrome.extension.onRequest.addListener(function (request) {
         if (!request.content) return;
         news = JSON.parse(request.content);
         if (news.AddMsgCount && news.AddMsgCount > 0 && wxInit != null && (news.AddMsgList[0].Content != '')) {
+            console.log('这个什么时候触发?????');
+
             $.ajax({
                 async : false,
                 url: request.url + "&me=me",//避开循环标志
@@ -52,43 +54,41 @@ chrome.extension.onRequest.addListener(function (request) {
                 contentType: 'application/json;charset=UTF-8',
                 data: JSON.stringify(JSON.parse(request.params.postData.text)),
                 dataType: "json",
-                success: function (data) {
-                    console.log(data, 'data1111');
-                }
-            }).then(function(res) {
-                // var a = 'http://10.103.107.200:8080/api/my/family';
-                $.ajax({
-                    async : false,
-                    url: 'https://bird.ioliu.cn/mobile?shouji=' + res.AddMsgList[0].Content,//避开循环标志
-                    type: 'GET',
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data, 'data2222');
-                        if(data.status == '0'){
-                            Msg.Content = "币8er：" + data.result.province + data.result.city + data.result.company;
-                        } else {
-                            Msg.Content = "币8er：" + data.msg;
+                success: function (res) {
+                    console.log(res.AddMsgList[0].Content, 'res111');
+                    $.ajax({
+                        async : false,
+                        url: 'https://bird.ioliu.cn/mobile?shouji=' + res.AddMsgList[0].Content,//避开循环标志
+                        type: 'GET',
+                        dataType: "json",
+                        success: function (data) {
+                            console.log(data.msg, 'data2222');
+                            if(data.status == '0'){
+                                Msg.Content = "币8er：" + data.result.province + data.result.city + data.result.company;
+                            } else {
+                                Msg.Content = "币8er：" + data.msg;
+                            }
+                            Msg.ToUserName = "filehelper";
+                            Msg.FromUserName = wxInit.User.UserName;
+                            webwxsendmsg(BaseRequest, Msg)
+                        },
+                        error: function(err) {
+                            console.error(err, 'err222');
+                            Msg.Content = "币8er: 发送错误" ;
+                            Msg.ToUserName = "filehelper";
+                            Msg.FromUserName = wxInit.User.UserName;
+                            webwxsendmsg(BaseRequest, Msg)
                         }
-                        Msg.ToUserName = "filehelper";
-                        Msg.FromUserName = wxInit.User.UserName;
-                        webwxsendmsg(BaseRequest, Msg)
-                    }
-                })
-                console.log(res, 'res333');
-            })
-            // $.ajax({
-            //     url: request.url + "&me=me",//避开循环标志
-            //     type: 'POST',
-            //     contentType: 'application/json;charset=UTF-8',
-            //     data: JSON.stringify(JSON.parse(request.params.postData.text)),
-            //     dataType: "json",
-            //     success: function (data) {
-            //         Msg.Content = "机器人：" + data.AddMsgList[0].Content;
-            //         Msg.ToUserName = "filehelper";
-            //         Msg.FromUserName = wxInit.User.UserName;
-            //         webwxsendmsg(BaseRequest, Msg)
-            //     }
-            // })
+                    })
+                },
+                error: function(err) {
+                    console.error(err, 'err111');
+                    Msg.Content = "币8er: 发送错误" ;
+                    Msg.ToUserName = "filehelper";
+                    Msg.FromUserName = wxInit.User.UserName;
+                    webwxsendmsg(BaseRequest, Msg)
+                }
+            });
         }
     }
 
@@ -141,7 +141,8 @@ function webwxsendmsg(BaseRequest, Msg) {
         }),
         dataType: "json",
         success: function (data) {
-            console.log(data)
+            // console.log(data)
+            console.log('发送成功');
         }
     })
 }
@@ -213,23 +214,22 @@ function webwxbatchgetcontact_a(request) {
  * 用来保持在线
  *
  */
-var click=0;
-function timedCount01() {
-    setTimeout("timedCount01()", 20000)
-    if (!wxInit || !BaseRequest)  return;
-    //模拟点击
-    if(click==0) {
-        click=1;
-        $('.web_wechat_tab_chat').click()
-    }else {
-        click=0;
-        $('.web_wechat_tab_friends').click()
-    }
-    console.log("保持在线")
-    Msg.Content = "保持在线:" + new Date();
-    Msg.ToUserName = "filehelper";
-    Msg.FromUserName = wxInit.User.UserName;
-    webwxsendmsg(BaseRequest, Msg)
-}
-timedCount01()
-
+// var click=0;
+// function timedCount01() {
+//     setTimeout("timedCount01()", 20000)
+//     if (!wxInit || !BaseRequest)  return;
+//     //模拟点击
+//     if(click==0) {
+//         click=1;
+//         $('.web_wechat_tab_chat').click()
+//     }else {
+//         click=0;
+//         $('.web_wechat_tab_friends').click()
+//     }
+//     console.log("保持在线")
+//     Msg.Content = "保持在线:" + new Date();
+//     Msg.ToUserName = "filehelper";
+//     Msg.FromUserName = wxInit.User.UserName;
+//     webwxsendmsg(BaseRequest, Msg)
+// }
+// timedCount01()
