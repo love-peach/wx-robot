@@ -46,18 +46,49 @@ chrome.extension.onRequest.addListener(function (request) {
         news = JSON.parse(request.content);
         if (news.AddMsgCount && news.AddMsgCount > 0 && wxInit != null && (news.AddMsgList[0].Content != '')) {
             $.ajax({
+                async : false,
                 url: request.url + "&me=me",//避开循环标志
                 type: 'POST',
                 contentType: 'application/json;charset=UTF-8',
                 data: JSON.stringify(JSON.parse(request.params.postData.text)),
                 dataType: "json",
                 success: function (data) {
-                    Msg.Content = "机器人：" + data.AddMsgList[0].Content;
-                    Msg.ToUserName = "filehelper";
-                    Msg.FromUserName = wxInit.User.UserName;
-                    webwxsendmsg(BaseRequest, Msg)
+                    console.log(data, 'data1111');
                 }
+            }).then(function(res) {
+                // var a = 'http://10.103.107.200:8080/api/my/family';
+                $.ajax({
+                    async : false,
+                    url: 'https://bird.ioliu.cn/mobile?shouji=' + res.AddMsgList[0].Content,//避开循环标志
+                    type: 'GET',
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data, 'data2222');
+                        if(data.status == '0'){
+                            Msg.Content = "币8er：" + data.result.province + data.result.city + data.result.company;
+                        } else {
+                            Msg.Content = "币8er：" + data.msg;
+                        }
+                        Msg.ToUserName = "filehelper";
+                        Msg.FromUserName = wxInit.User.UserName;
+                        webwxsendmsg(BaseRequest, Msg)
+                    }
+                })
+                console.log(res, 'res333');
             })
+            // $.ajax({
+            //     url: request.url + "&me=me",//避开循环标志
+            //     type: 'POST',
+            //     contentType: 'application/json;charset=UTF-8',
+            //     data: JSON.stringify(JSON.parse(request.params.postData.text)),
+            //     dataType: "json",
+            //     success: function (data) {
+            //         Msg.Content = "机器人：" + data.AddMsgList[0].Content;
+            //         Msg.ToUserName = "filehelper";
+            //         Msg.FromUserName = wxInit.User.UserName;
+            //         webwxsendmsg(BaseRequest, Msg)
+            //     }
+            // })
         }
     }
 
@@ -201,13 +232,4 @@ function timedCount01() {
     webwxsendmsg(BaseRequest, Msg)
 }
 timedCount01()
-
-
-
-
-
-
-
-
-
 
