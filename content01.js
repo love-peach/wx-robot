@@ -69,10 +69,10 @@ chrome.extension.onRequest.addListener(function (request) {
                             isAt: contentObj.Content.indexOf('币8-瑶瑶') > -1 ? 1 : 0
                         };
                         if(contentArr.length === 1) {
-                            paramsObj.content = contentArr[0];
+                            paramsObj.content = contentArr[0].replace(/@币8-瑶瑶 /, '');
                             replyKeyWord(paramsObj);
                         } else if(contentArr.length === 2){
-                            paramsObj.content = contentArr[1];
+                            paramsObj.content = contentArr[1].replace(/@币8-瑶瑶 /, '');
                             replyKeyWord(paramsObj);
                         }
                     }
