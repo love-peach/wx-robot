@@ -27,6 +27,7 @@ var Msg = {
 
 var replyImgMediaId = '';
 var replyImgUrl = '';
+var replyMessageUrl = 'https://weixin.diyli.cn/wechat/chrome/message';
 
 
 /**
@@ -55,18 +56,29 @@ chrome.extension.onRequest.addListener(function (request) {
                 dataType: "json",
                 success: function (res) {
                     // 如果联系人有变化
-                    if(res.ModContactCount !== 0) {
+                    console.log(res, 'res');
+                    if(res.ModContactCount === 1) {
                         sayHelloToNewGuys(res);
                     } else {
-                        replyKeyWord(res);
+                        var contentObj = res.AddMsgList[0];
+                        var contentArr = contentObj.Content.split('<br/>');
+                        var paramsObj = {
+                            content: '',
+                            FromUserName: contentObj.FromUserName,
+                            ToUserName: 'filehelper',
+                            isAt: contentObj.Content.indexOf('@阿能') > -1 ? 1 : 0
+                        };
+                        if(contentArr.length === 1) {
+                            paramsObj.content = contentArr[0];
+                            replyKeyWord(paramsObj);
+                        } else if(contentArr.length === 2){
+                            paramsObj.content = contentArr[1];
+                            replyKeyWord(paramsObj);
+                        }
                     }
                 },
                 error: function(err) {
                     console.error(err, 'err111');
-                    Msg.Content = "币8er: 发送错误" ;
-                    Msg.ToUserName = "filehelper";
-                    Msg.FromUserName = wxInit.User.UserName;
-                    webwxsendmsg(BaseRequest, Msg)
                 }
             });
         }
@@ -80,7 +92,7 @@ chrome.extension.onRequest.addListener(function (request) {
         wxInit_a(request);
         Contact_a(request);
         webwxbatchgetcontact_a(request);
-        getReplyImgMediaId();
+        // getReplyImgMediaId();
 
         BaseRequest = JSON.parse(request.BaseRequest.postData.text)
     }
@@ -102,26 +114,28 @@ function sayHelloToNewGuys(res) {
 }
 
 // 请求关键字结果
-function replyKeyWord(res) {
+function replyKeyWord(paramsObj) {
     $.ajax({
         async : false,
-        url: 'https://bird.ioliu.cn/mobile?shouji=' + res.AddMsgList[0].Content,
+        url: replyMessageUrl + '?content=' + paramsObj.content + '&nickName=' + paramsObj.FromUserName + '&at=' + paramsObj.isAt,
         type: 'GET',
         dataType: "json",
-        success: function (data) {
-            Msg.ToUserName = "filehelper";
+        success: function (result) {
+            Msg.ToUserName = paramsObj.ToUserName;
             Msg.FromUserName = wxInit.User.UserName;
-            if(data.status == '0'){
-                Msg.Content = '币8er:' + data.result.province + data.result.city + data.result.company;
-            } else {
-                Msg.Content = "币8er：" + data.msg;
+            if(result.code == 200){
+                Msg.Content = result.data;
+                webwxsendmsg(BaseRequest, Msg)
             }
-            webwxsendmsg(BaseRequest, Msg)
         },
         error: function(err) {
             console.error('请求关键字结果出错:', err);
         }
     })
+}
+
+function getReplayWhereFrom(res) {
+    // webwxbatchgetcontact
 }
 
 // 获取图片 MediaId
@@ -266,6 +280,7 @@ function webwxbatchgetcontact_a(request) {
         success: function (data) {
             if (data.Count == 0) webwxbatchgetcontact_a(request);
             webwxbatchgetcontact = data
+            console.log(webwxbatchgetcontact, 'webwxbatchgetcontact');
         },
         timeout: 3000,
         complete: function (XMLHttpRequest, status) {
