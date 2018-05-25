@@ -65,8 +65,8 @@ chrome.extension.onRequest.addListener(function (request) {
                         var paramsObj = {
                             content: '',
                             FromUserName: contentObj.FromUserName,
-                            ToUserName: 'filehelper',
-                            isAt: contentObj.Content.indexOf('@阿能') > -1 ? 1 : 0
+                            ToUserName: contentObj.FromUserName,
+                            isAt: contentObj.Content.indexOf('币8-瑶瑶') > -1 ? 1 : 0
                         };
                         if(contentArr.length === 1) {
                             paramsObj.content = contentArr[0];
