@@ -106,7 +106,7 @@ function sayHelloToNewGuys(res) {
     Msg.FromUserName = wxInit.User.UserName;
     res.ModContactList.forEach(function(item) {
         Msg.ToUserName = item.UserName;
-        Msg.Content = replyTextWord1 + '\n' + replyTextWord2 + '\n' + replyTextWord3;
+        Msg.Content = replyTextWord1 + '\n\n' + replyTextWord2 + '\n\n' + replyTextWord3;
         if(item.UserName.substr(0,2) !== '@@') {
             webwxsendmsg(BaseRequest, Msg, function () {
                 Msg.MediaId = replyImgMediaId;
