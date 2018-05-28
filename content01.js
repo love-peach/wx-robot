@@ -99,11 +99,14 @@ chrome.extension.onRequest.addListener(function (request) {
 });
 
 // 给新添加的好友自动回复消息
+var replyTextWord1 = '1.【加号奖励】感谢你与币8建立沟通链接，送一份数据资料（下方图片），聊表心意。';
+var replyTextWord2 = '2.【私聊/群聊查询】发送：BTC，ETH，EOS等数字货币代号查看实时行情。';
+var replyTextWord3 = '3.【拉群奖励】拉本号进一个币圈群的小伙伴，我将拉你进入币8内部群，群里有已实战翻多倍的大牛和专门的数据团队为你提供专业数据分析服务。';
 function sayHelloToNewGuys(res) {
     Msg.FromUserName = wxInit.User.UserName;
     res.ModContactList.forEach(function(item) {
         Msg.ToUserName = item.UserName;
-        Msg.Content = 'hello '+ item.NickName +' 请扫码入群';
+        Msg.Content = replyTextWord1 + '\n' + replyTextWord2 + '\n' + replyTextWord3;
         if(item.UserName.substr(0,2) !== '@@') {
             webwxsendmsg(BaseRequest, Msg, function () {
                 Msg.MediaId = replyImgMediaId;
